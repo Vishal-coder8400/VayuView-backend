@@ -987,12 +987,23 @@ function calculateAverages(data, key) {
     // Start the server
 
     // ✅ ADD THIS INSTEAD
-if (process.env.NODE_ENV !== "production") {
-  app.listen(port, () => {
-    logger.info(`Server running locally on http://localhost:${port}`);
+// MongoDB connection & optional local server
+connectToDatabase()
+  .then(() => {
+    if (process.env.NODE_ENV !== "production") {
+      app.listen(port, () => {
+        logger.info(`Local server running at http://localhost:${port}`);
+      });
+    }
+  })
+  .catch((err) => {
+    console.error("Failed to connect to DB", err);
   });
-}
+
   })
   .catch((err) => {
     console.log(err);
   });
+  
+// ✅ Export app for Vercel Serverless
+module.exports = app;
