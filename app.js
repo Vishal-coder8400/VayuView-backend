@@ -986,10 +986,12 @@ function calculateAverages(data, key) {
 
     // Start the server
 
-    console.log("Connected DB", port);
-    app.listen(port, () => {
-      logger.info(`Server is running on port ${port}`);
-    });
+    // ✅ ADD THIS INSTEAD
+if (process.env.NODE_ENV !== "production") {
+  app.listen(port, () => {
+    logger.info(`Server running locally on http://localhost:${port}`);
+  });
+}
   })
   .catch((err) => {
     console.log(err);
