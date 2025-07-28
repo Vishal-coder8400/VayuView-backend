@@ -19,6 +19,11 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
 
+// ✅ Debug logs
+console.log("📦 NODE_ENV:", process.env.NODE_ENV);
+console.log("📡 MongoDB URI:", process.env.MONGODB_URI);
+console.log("🚀 PORT:", port);
+
 // ✅ Create folders if they don't exist
 const uploadFolder = path.join(__dirname, "uploads");
 const thumbnailFolder = path.join(__dirname, "thumbnails");
@@ -43,7 +48,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.static("public"));
 
-// ✅ Connect to MongoDB (once per cold start)
+// ✅ Connect to MongoDB
 connectToDatabase();
 
 // ✅ Load Routes
@@ -954,7 +959,7 @@ function calculateAverages(data, key) {
       }
     });
 
-   // ✅ 404 Route Handler
+// ✅ 404 Handler
 app.use((req, res, next) => {
   sendErrorResponse(res, "Route not found!", {}, 404);
 });
@@ -965,13 +970,12 @@ app.use((err, req, res, next) => {
   sendErrorResponse(res, "Some error occurred!");
 });
 
-
-// ✅ Local development: Only listen if not on Vercel
+// ✅ Don't start server manually if on Vercel
 if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => {
     logger.info(`Local server running at http://localhost:${port}`);
   });
 }
 
-// ✅ Export app for Vercel serverless deployment
+// ✅ Always export the app for Vercel
 module.exports = app;
