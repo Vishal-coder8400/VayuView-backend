@@ -27,16 +27,16 @@ const connectToDatabase = async () => {
     });
 
     db.on("error", (err) => {
-      logger.error(`❌ MongoDB connection error: ${err}`);
+      logger.error(` MongoDB connection error: ${err}`);
     });
 
     db.on("disconnected", () => {
-      logger.info("⚠️ Disconnected from MongoDB");
+      logger.info(" Disconnected from MongoDB");
     });
 
     process.on("SIGINT", () => {
       db.close(() => {
-        logger.warn("🔌 MongoDB connection closed due to app termination");
+        logger.warn(" MongoDB connection closed due to app termination");
         process.exit(0);
       });
     });

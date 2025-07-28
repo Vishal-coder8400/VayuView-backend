@@ -53,7 +53,7 @@ exports.login = async (req, res) => {
       role: customer.user_role,
     });
   } catch (error) {
-    console.error("💥 Login route error:", error);
+    console.error(" Login route error:", error);
     return sendErrorResponse(res, "Internal server error", error.message, 500);
   }
 };
