@@ -14,10 +14,10 @@ const {
   sendErrorResponse,
 } = require("./utils/responseUtils");
 
-// Load env variables
+// ✅ Load env variables
 dotenv.config();
-
 const app = express();
+const port = process.env.PORT || 4000;
 
 // ✅ Create folders if they don't exist
 const uploadFolder = path.join(__dirname, "uploads");
@@ -58,7 +58,6 @@ app.get("/", (req, res) => {
   sendSuccessResponse(res, "VG-backend running!");
 });
 
-    
    // Function to calculate averages
 function calculateAverages(data, key) {
   // Check if the key exists in the data
@@ -884,7 +883,7 @@ function calculateAverages(data, key) {
 
     // Serve thumbnails and files statically
     app.use("/uploads", express.static(uploadFolder));
-    app.use("/default", express.static(defaultFolder));
+  // app.use("/default", express.static(defaultFolder));
     app.use("/thumbnails", express.static(thumbnailFolder));
 
     // API to download a file
@@ -955,21 +954,24 @@ function calculateAverages(data, key) {
       }
     });
 
-    // ✅ 404 Route Handler
+   // ✅ 404 Route Handler
 app.use((req, res, next) => {
   sendErrorResponse(res, "Route not found!", {}, 404);
 });
 
-// ✅ Error Handler
+// ✅ Global Error Handler
 app.use((err, req, res, next) => {
   logger.error(err.stack);
   sendErrorResponse(res, "Some error occurred!");
 });
 
-// ✅ Export app for Vercel Serverless
+
+// ✅ Local development: Only listen if not on Vercel
 if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => {
     logger.info(`Local server running at http://localhost:${port}`);
   });
 }
+
+// ✅ Export app for Vercel serverless deployment
 module.exports = app;
