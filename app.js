@@ -1,30 +1,32 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { connectToDatabase } = require("./config/db");
-const { logger } = require("./config/logger");
 const dotenv = require("dotenv");
-const ExcelJS = require("exceljs");
-const {
-  sendSuccessResponse,
-  sendErrorResponse,
-} = require("./utils/responseUtils");
-const cronJob = require("./utils/bg_runner");
-
 const multer = require("multer");
 const sharp = require("sharp");
 const fs = require("fs");
 const path = require("path");
 
+const { connectToDatabase } = require("./config/db");
+const { logger } = require("./config/logger");
+const {
+  sendSuccessResponse,
+  sendErrorResponse,
+} = require("./utils/responseUtils");
+
+// Load env variables
+dotenv.config();
+
+const app = express();
+
+// ✅ Create folders if they don't exist
 const uploadFolder = path.join(__dirname, "uploads");
-const defaultFolder = path.join(__dirname, "default_images");
 const thumbnailFolder = path.join(__dirname, "thumbnails");
 
-// Ensure folders exist
 if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder);
 if (!fs.existsSync(thumbnailFolder)) fs.mkdirSync(thumbnailFolder);
 
-// Multer configuration
+// ✅ Multer Setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadFolder),
   filename: (req, file, cb) => {
@@ -33,42 +35,28 @@ const storage = multer.diskStorage({
     cb(null, `${timestamp}-${originalName}`);
   },
 });
-
 const upload = multer({ storage });
 
-dotenv.config();
-const app = express();
-
-const port = process.env.PORT || 4000;
-
-// Middleware
+// ✅ Express Middleware
 app.use(bodyParser.json({ limit: "150mb" }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.static("public"));
 
-// Routes
+// ✅ Connect to MongoDB (once per cold start)
+connectToDatabase();
+
+// ✅ Load Routes
 const crudRoutes = require("./routes/crudRoutes");
-const Customer = require("./models/customerModel");
-const { default: mongoose } = require("mongoose");
-const Subscription = require("./models/subscriptionModel");
-const Dashboard = require("./models/dashboardModel");
-const AirQualityDevice = require("./models/airQualityModel");
-
 const authRoutes = require("./routes/authRoute");
-app.use("/api", authRoutes); // Final routes: /api/auth/login and /api/auth/signup
 
+app.use("/api", authRoutes);   // e.g. /api/login
+app.use("/api", crudRoutes);   // e.g. /api/customers
 
-// Use your routes
-app.use("/api", crudRoutes);
-app.use(bodyParser.urlencoded({ extended: true }));
-
-connectToDatabase()
-  .then((db) => {
-    // default route
-    app.get("/", (req, res) => {
-      sendSuccessResponse(res, "VG-backend running!");
-    });
-
+// ✅ Root Route
+app.get("/", (req, res) => {
+  sendSuccessResponse(res, "VG-backend running!");
+});
 
     
    // Function to calculate averages
@@ -967,43 +955,26 @@ function calculateAverages(data, key) {
       }
     });
 
-    app.use((req, res, next) => {
-      sendErrorResponse(
-        res,
-        "Route not found!",
-        (error = {}),
-        (status_code = 404)
-      );
-    });
+    // ✅ 404 Route Handler
+app.use((req, res, next) => {
+  sendErrorResponse(res, "Route not found!", {}, 404);
+});
 
+// ✅ Error Handler
+app.use((err, req, res, next) => {
+  logger.error(err.stack);
+  sendErrorResponse(res, "Some error occurred!");
+});
 
-
-    // Error handling middleware
-    app.use((err, req, res, next) => {
-      logger.error(err.stack);
-      sendErrorResponse(res, "Some error occurred!");
-    });
-
-    // Start the server
-
-    // ✅ ADD THIS INSTEAD
-// MongoDB connection & optional local server
-connectToDatabase()
-  .then(() => {
-    if (process.env.NODE_ENV !== "production") {
-      app.listen(port, () => {
-        logger.info(`Local server running at http://localhost:${port}`);
-      });
-    }
-  })
-  .catch((err) => {
-    console.error("Failed to connect to DB", err);
-  });
-
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-  
 // ✅ Export app for Vercel Serverless
 module.exports = app;
+
+// ✅ Optional Localhost server (used only in development)
+if (process.env.NODE_ENV !== "production") {
+  const port = process.env.PORT || 4000;
+  app.listen(port, () => {
+    logger.info(`Server running locally at http://localhost:${port}`);
+  });
+}
+
+ 
