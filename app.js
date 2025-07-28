@@ -967,14 +967,9 @@ app.use((err, req, res, next) => {
 });
 
 // ✅ Export app for Vercel Serverless
-module.exports = app;
-
-// ✅ Optional Localhost server (used only in development)
 if (process.env.NODE_ENV !== "production") {
-  const port = process.env.PORT || 4000;
   app.listen(port, () => {
-    logger.info(`Server running locally at http://localhost:${port}`);
+    logger.info(`Local server running at http://localhost:${port}`);
   });
 }
-
- 
+module.exports = app;
