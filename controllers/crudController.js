@@ -58,6 +58,7 @@ exports.getAllDocuments = async (req, res) => {
       phone: "Phone",
       user_role: "User Role"
     },
+
     AirQualityDevice: {
       deviceId: "Device ID",
       name: "Name",
@@ -69,6 +70,7 @@ exports.getAllDocuments = async (req, res) => {
       subsciptionExpiryDate: "Subscription Last Date",
       editableByCustomer: "Editable by customer",
     },
+
     Dashboard: {
       dashboardId: "Dashboard ID",
       title: "Title",
@@ -79,6 +81,7 @@ exports.getAllDocuments = async (req, res) => {
       template: "Template",
       share: "Share",
     },
+    
     Subscription: {
       subscriptionId: "Subscription ID",
       subscriberName: "Subscriber Name",
@@ -87,6 +90,7 @@ exports.getAllDocuments = async (req, res) => {
       apiKey: "API KEY",
       active: "Active",
     },
+    
   };
 
   if (!Model) {
@@ -124,6 +128,7 @@ exports.getAllDocuments = async (req, res) => {
       data: documents,
       columns,
     });
+    
   } catch (error) {
     console.log(error, "error");
     return sendErrorResponse(res, `Failed to fetch ${modelName}s`, error, 500);

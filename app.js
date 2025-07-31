@@ -19,10 +19,10 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
 
-// ✅ Debug logs
-console.log("📦 NODE_ENV:", process.env.NODE_ENV);
-console.log("📡 MongoDB URI:", process.env.MONGODB_URI);
-console.log("🚀 PORT:", port);
+// // ✅ Debug logs
+// console.log("📦 NODE_ENV:", process.env.NODE_ENV);
+// console.log("📡 MongoDB URI:", process.env.MONGODB_URI);
+// console.log("🚀 PORT:", port);
 
 // ✅ Create folders if they don't exist
 const uploadFolder = path.join(__dirname, "uploads");
@@ -971,11 +971,17 @@ app.use((err, req, res, next) => {
 });
 
 // ✅ Don't start server manually if on Vercel
-if (process.env.NODE_ENV !== "production") {
-  app.listen(port, () => {
-    logger.info(`Local server running at http://localhost:${port}`);
-  });
-}
+// if (process.env.NODE_ENV !== "production") {
+//   app.listen(port, () => {
+//     logger.info(`Local server running at http://localhost:${port}`);
+//   });
+// }
+
+// ✅ Start server locally always (for dev)
+app.listen(port, () => {
+  console.log(`✅ Local server running at http://localhost:${port}`);
+});
+
 
 // ✅ Always export the app for Vercel
 module.exports = app;
